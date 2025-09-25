@@ -1,6 +1,10 @@
 #!/bin/bash
 
-create_shim() {
+cleanup_shim_image() { 
+    rm -rf "$SHIM_DIR_IMAGE"; 
+}
+
+create_shim_image() {
     local name="$1"; shift
     local fallback="$1"; shift
     if ! command -v "$name" >/dev/null 2>&1 && command -v "$fallback" >/dev/null 2>&1; then
@@ -10,6 +14,10 @@ exec $fallback "\$@"
 SHIM
     chmod +x "$SHIM_DIR_IMAGE/$name"
     fi
+}
+
+cleanup_shim_ttf() { 
+    rm -rf "$SHIM_DIR_TTF"; 
 }
 
 create_shim_ttf() {
@@ -107,13 +115,12 @@ if [ "$BUILD_IMAGE" == "yes" ]; then
     # Prepare logs and shims like shared_windows.sh to avoid automake version issues
     mkdir -p "$PROJECT_ROOT/build/logs"
     SHIM_DIR_IMAGE="$(mktemp -d)"
-    cleanup_shim_image() { rm -rf "$SHIM_DIR_IMAGE"; }
     trap cleanup_shim_image EXIT
 
-    create_shim "aclocal-1.16" "aclocal-1.17"
-    create_shim "aclocal-1.16" "aclocal"
-    create_shim "automake-1.16" "automake-1.17"
-    create_shim "automake-1.16" "automake"
+    create_shim_image "aclocal-1.16" "aclocal-1.17"
+    create_shim_image "aclocal-1.16" "aclocal"
+    create_shim_image "automake-1.16" "automake-1.17"
+    create_shim_image "automake-1.16" "automake"
 
     # If no aclocal found, create empty aclocal.m4 and avoid autoreconf during make
     if ! command -v aclocal >/dev/null 2>&1 && [ ! -x "$SHIM_DIR_IMAGE/aclocal-1.16" ]; then
@@ -183,7 +190,6 @@ if [ "$BUILD_TTF" == "yes" ]; then
     # Prepare logs and shims for SDL_ttf
     mkdir -p "$PROJECT_ROOT/build/logs"
     SHIM_DIR_TTF="$(mktemp -d)"
-    cleanup_shim_ttf() { rm -rf "$SHIM_DIR_TTF"; }
     trap cleanup_shim_ttf EXIT
 
     create_shim_ttf "aclocal-1.16" "aclocal-1.17"
