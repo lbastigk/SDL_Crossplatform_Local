@@ -2,6 +2,10 @@
 
 A Repository to build SDL2, SDL2_image and SDL2_ttf locally (static Linux libs and Windows DLLs).
 
+Tested on:
+
+- Fedora 42
+
 Quick start
 -----------
 
