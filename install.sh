@@ -22,8 +22,21 @@ chmod +x Scripts/SDL2_build/build_lib/*.sh
 Scripts/SDL2_build/package_installation.sh
 
 ######################################
+# Ensure a clean build environment
+cd "$PROJECT_ROOT"
+rm -rf external
+rm -rf build
+
+mkdir -p build
+mkdir -p build/logs
+mkdir -p build/SDL2
+mkdir -p external
+
+######################################
 # Initialize git submodules
-git submodule update --init --recursive
+echo "[INFO] Initializing git submodules..."
+git submodule update --init --recursive > /dev/null 2>&1
+echo "[INFO] Git submodules initialized."
 
 ####################################
 # Submodules: SDL
@@ -73,7 +86,6 @@ Scripts/SDL2_build/reset_sdl_submodules.sh > /dev/null 2>&1 \
 ####################################
 # Uninitialize git submodules
 git submodule deinit -f --all           > /dev/null 2>&1
-#git submodule update --init --recursive > /dev/null 2>&1
 
 ####################################
 # Finished
