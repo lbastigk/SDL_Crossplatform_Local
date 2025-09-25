@@ -31,7 +31,7 @@ DNF_PACKAGES="cmake automake @development-tools autoconf libtool m4 perl mingw64
 
 # Install packages based on detected package manager
 case $PACKAGE_MANAGER in
-    "apt-get")
+    "apt")
         sudo apt-get update
         sudo apt-get install -y $APT_PACKAGES
         ;;

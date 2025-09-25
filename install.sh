@@ -15,11 +15,10 @@ fi
 ######################################
 # Make all scripts executable
 chmod +x Scripts/*.sh
-chmod +x Scripts/SDL2_build/*.sh
 
 ######################################
 # Package installation
-Scripts/SDL2_build/package_installation.sh
+Scripts/package_installation.sh
 
 ######################################
 # Ensure a clean build environment
@@ -50,21 +49,21 @@ echo "[INFO] Starting SDL2 builds"
 # Static Linux build
 echo "[INFO] Building SDL2 static-linux"
 cd "$PROJECT_ROOT"
-Scripts/SDL2_build/build_sdl.sh linux core ttf image > /dev/null 2>&1 \
+Scripts/build_sdl.sh linux core ttf image > /dev/null 2>&1 \
 || { echo "[ERROR] SDL2 static-linux build failed" > /dev/stderr; exit 1; }
 echo "[INFO] SDL2 static-linux build completed"
 
 # Shared Windows build
 echo "[INFO] Building SDL2 shared-windows"
 cd "$PROJECT_ROOT"
-Scripts/SDL2_build/build_sdl.sh windows core ttf image > /dev/null 2>&1 \
+Scripts/build_sdl.sh windows core ttf image > /dev/null 2>&1 \
 || { echo "[ERROR] SDL2 shared-windows build failed" > /dev/stderr; exit 1; }
 echo "[INFO] SDL2 shared-windows build completed"
 
 ####################################
 # Reset 
 cd "$PROJECT_ROOT"
-Scripts/SDL2_build/reset_sdl_submodules.sh > /dev/null 2>&1 \
+Scripts/reset_sdl_submodules.sh > /dev/null 2>&1 \
 || { echo "[ERROR] SDL2 submodule reset failed" > /dev/stderr; exit 1; }
 
 ####################################
@@ -74,3 +73,11 @@ git submodule deinit -f --all           > /dev/null 2>&1
 ####################################
 # Finished
 echo "[INFO] All builds completed successfully."
+echo "[INFO] Removing submodules"
+rm -rf .git/modules/external/SDL2
+rm -rf .git/modules/external/SDL2_ttf
+rm -rf .git/modules/external/SDL2_image
+rm -rf external/SDL2
+rm -rf external/SDL2_ttf
+rm -rf external/SDL2_image
+echo "[INFO] Submodules removed"
