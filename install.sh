@@ -73,11 +73,3 @@ git submodule deinit -f --all           > /dev/null 2>&1
 ####################################
 # Finished
 echo "[INFO] All builds completed successfully."
-echo "[INFO] Removing submodules"
-rm -rf .git/modules/external/SDL2
-rm -rf .git/modules/external/SDL2_ttf
-rm -rf .git/modules/external/SDL2_image
-rm -rf external/SDL2
-rm -rf external/SDL2_ttf
-rm -rf external/SDL2_image
-echo "[INFO] Submodules removed"
