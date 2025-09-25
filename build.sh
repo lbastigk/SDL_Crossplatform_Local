@@ -16,6 +16,12 @@ if [ ! -d "./build/SDL2" ]; then
 fi
 
 ################################################
+# Create bin directory if it doesn't exist
+if [ ! -d "./bin" ]; then
+    mkdir -p ./bin
+fi
+
+################################################
 # Enable strict error handling
 set -Ee
 trap 'echo ""; echo "[ERROR] Build failed on ${build_type}!"; echo "Consider running a full clean with make clean"; exit 1' ERR
