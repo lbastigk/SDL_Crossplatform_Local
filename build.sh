@@ -1,11 +1,4 @@
 #!/bin/bash
-echo "    _   ____________  __  ____    ________________     ____  __  ________    ____ ";
-echo "   / | / / ____/ __ )/ / / / /   /  _/_  __/ ____/    / __ )/ / / /  _/ /   / __ \\";
-echo "  /  |/ / __/ / __  / / / / /    / /  / / / __/      / __  / / / // // /   / / / /";
-echo " / /|  / /___/ /_/ / /_/ / /____/ /  / / / /___     / /_/ / /_/ // // /___/ /_/ / ";
-echo "/_/ |_/_____/_____/\____/_____/___/ /_/ /_____/____/_____/\____/___/_____/_____/  ";
-echo "                                             /_____/                              ";
-echo ""
 
 ################################################
 # Check for sudo
@@ -86,8 +79,15 @@ function build_release_windows() {
       cmake --build ./build/windows-release -j$(nproc)
       cp ./build/windows-release/SDL_Example.exe ./bin/SDL_Example.exe
 
-      # Copy dlls from install.sh-created SDL2_build into the application bin
-      cp external/SDL2_build/shared_windows/bin/*.dll ./bin/
+      # Copy DLLs from the SDL2 install directory plus dependency bins into the application bin
+      # CMake install places DLLs under build/SDL2/shared_windows/bin
+      cp build/SDL2/shared_windows/bin/*.dll ./bin/ || true
+      # Also copy dependency DLLs (freetype, harfbuzz, etc.) if present
+      for d in build/SDL2/shared_windows/deps/*/bin; do
+          if [ -d "$d" ]; then
+              cp "$d"/*.dll ./bin/ 2>/dev/null || true
+          fi
+      done
 }
 
 function generate_standards() {

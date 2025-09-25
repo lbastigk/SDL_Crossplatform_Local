@@ -119,11 +119,20 @@ elseif(UNIX)
         ${SDL2_BUILD_PATH}/static_linux/include/SDL2
     )
 
+    # Link known libraries directly (simpler and deterministic)
     target_link_libraries(SDL_Example PRIVATE
         "${SDL2_BUILD_PATH}/static_linux/lib/libSDL2main.a"
         "${SDL2_BUILD_PATH}/static_linux/lib/libSDL2_ttf.a"
         "${SDL2_BUILD_PATH}/static_linux/lib/libSDL2_image.a"
         "${SDL2_BUILD_PATH}/static_linux/lib/libSDL2.a"
+        "${SDL2_BUILD_PATH}/static_linux/deps/freetype/lib/libfreetype.a"
+        "${SDL2_BUILD_PATH}/static_linux/deps/harfbuzz/lib/libharfbuzz.a"
+        # libfreetype depends on zlib, libpng, bzip2 and brotli
+        z
+        png
+        bz2
+        brotlidec
+        m
     )
 ##################
 # UNKNOWN        #
