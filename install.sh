@@ -73,4 +73,8 @@ Scripts/SDL2_build/reset_sdl_submodules.sh > /dev/null 2>&1 \
 ####################################
 # Uninitialize git submodules
 git submodule deinit -f --all           > /dev/null 2>&1
-git submodule update --init --recursive > /dev/null 2>&1
+#git submodule update --init --recursive > /dev/null 2>&1
+
+####################################
+# Finished
+echo "[INFO] All builds completed successfully."

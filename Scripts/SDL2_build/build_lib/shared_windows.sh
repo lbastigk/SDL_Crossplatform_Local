@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Here be dragons
+# This code is terrible, but at least it works.
+
 ######################################
 # Build shared SDL2 library for Windows (DLLs) using MinGW
 ######################################
