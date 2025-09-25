@@ -4,6 +4,13 @@ rm -rf deployment
 mkdir -p deployment
 
 ########################################
+# Check if we run script from correct directory
+if [ ! -f "$ROOT_DIR/Scripts/deploy.sh" ]; then
+    echo "[ERROR] Please run this script from the root directory of the repository." > /dev/stderr
+    exit 1
+fi
+
+########################################
 # Clone
 cd deployment
 git clone https://github.com/lbastigk/SDL_Crossplatform_Local.git
@@ -12,7 +19,7 @@ cd SDL_Crossplatform_Local
 ########################################
 # Install
 echo "[INFO] Installing SDL"
-./install.sh
+Scripts/install.sh
 if [ $? -ne 0 ]; then
     echo "[ERROR] Installation of SDL failed. Deployment aborted." > /dev/stderr
     exit 1
@@ -22,7 +29,7 @@ fi
 
 ########################################
 # Build binaries
-./build.sh
+Scripts/build.sh
 if [ $? -ne 0 ]; then
     echo "[ERROR] Build failed. Deployment aborted." > /dev/stderr
     exit 1

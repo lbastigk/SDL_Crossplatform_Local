@@ -73,3 +73,5 @@ git submodule deinit -f --all           > /dev/null 2>&1
 ####################################
 # Finished
 echo "[INFO] All builds completed successfully."
+git submodule deinit -f --all        # disconnect submodules
+rm -rf .git/modules/*                # remove all cached submodule repos

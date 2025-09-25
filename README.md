@@ -14,7 +14,7 @@ Quick start
 2. Run (as a normal user):
 
 ```bash
-./install.sh
+Scripts/install.sh
 ```
 
 Or run a focused build (keeps console output):
@@ -29,7 +29,7 @@ Scripts/build_sdl.sh windows core image ttf
 
 Full worflow with SDL installation, application build and test:
 ```bash
-./install.sh && ./build.sh && Scripts/test_binaries.sh
+Scripts/install.sh && Scripts/build.sh && Scripts/test_binaries.sh
 ```
 
 Outputs & logs
