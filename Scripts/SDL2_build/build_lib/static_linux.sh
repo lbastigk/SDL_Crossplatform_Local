@@ -38,8 +38,6 @@ make install      || { echo "[ERROR] SDL2 static-linux failed at install" > /dev
 
 ######################################
 # 2.) SDL2_image
-echo ""
-echo "---------------------------------------------------"
 echo "[INFO] Building SDL2_image static-linux"
 
 # Navigate to SDL2_image source directory
@@ -59,8 +57,6 @@ make install      || { echo "[ERROR] SDL2_image static-linux failed at install" 
 
 ######################################
 # 3.) SDL2_ttf
-echo ""
-echo "---------------------------------------------------"
 echo "[INFO] Building SDL2_ttf static-linux"
 
 # Navigate to SDL2_ttf source directory

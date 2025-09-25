@@ -20,7 +20,7 @@ mkdir -p "$INSTALLATION_PATH"
 
 ######################################
 # 1.) SDL2
-echo "[INFO] Building SDL2 shared-linux"
+echo "[INFO] Building SDL2 main shared-linux"
 
 # Navigate to SDL2 source directory
 cd "$PROJECT_ROOT/external/SDL2"
@@ -38,8 +38,6 @@ make install      || { echo "[ERROR] SDL2 shared-linux failed at install" > /dev
 
 ######################################
 # 2.) SDL2_image
-echo ""
-echo "---------------------------------------------------"
 echo "[INFO] Building SDL2_image shared-linux"
 
 # Navigate to SDL2_image source directory
@@ -59,8 +57,6 @@ make install      || { echo "[ERROR] SDL2_image shared-linux failed at install" 
 
 ######################################
 # 3.) SDL2_ttf
-echo ""
-echo "---------------------------------------------------"
 echo "[INFO] Building SDL2_ttf shared-linux"
 
 # Navigate to SDL2_ttf source directory
