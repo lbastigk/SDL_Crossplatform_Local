@@ -15,7 +15,6 @@ fi
 ######################################
 # Make all scripts executable
 chmod +x Scripts/SDL2_build/*.sh
-chmod +x Scripts/SDL2_build/build_lib/*.sh
 
 ######################################
 # Package installation
@@ -50,30 +49,14 @@ echo "[INFO] Starting SDL2 builds..."
 # Static Linux build
 echo "[INFO] Building SDL2 static-linux..."
 cd "$PROJECT_ROOT"
-INSTALLATION_PATH="$PROJECT_ROOT/build/SDL2/static_linux"
-rm -rf "$INSTALLATION_PATH"
-mkdir -p "$INSTALLATION_PATH"
-Scripts/SDL2_build/build_lib/static_linux.sh > /dev/null 2>&1 \
+Scripts/SDL2_build/build_sdl.sh linux core ttf image > /dev/null 2>&1 \
 || { echo "[ERROR] SDL2 static-linux build failed" > /dev/stderr; exit 1; }
 echo "[INFO] SDL2 static-linux build completed."
-
-# Shared Linux build
-echo "[INFO] Building SDL2 shared-linux..."
-cd "$PROJECT_ROOT"
-INSTALLATION_PATH="$PROJECT_ROOT/build/SDL2/shared_linux"
-rm -rf "$INSTALLATION_PATH"
-mkdir -p "$INSTALLATION_PATH"
-Scripts/SDL2_build/build_lib/shared_linux.sh > /dev/null 2>&1 \
-|| { echo "[ERROR] SDL2 shared-linux build failed" > /dev/stderr; exit 1; }
-echo "[INFO] SDL2 shared-linux build completed."
 
 # Shared Windows build
 echo "[INFO] Building SDL2 shared-windows..."
 cd "$PROJECT_ROOT"
-INSTALLATION_PATH="$PROJECT_ROOT/build/SDL2/shared_windows"
-rm -rf "$INSTALLATION_PATH"
-mkdir -p "$INSTALLATION_PATH"
-Scripts/SDL2_build/build_lib/shared_windows.sh > /dev/null 2>&1 \
+Scripts/SDL2_build/build_sdl.sh windows core ttf image > /dev/null 2>&1 \
 || { echo "[ERROR] SDL2 shared-windows build failed" > /dev/stderr; exit 1; }
 echo "[INFO] SDL2 shared-windows build completed."
 

@@ -3,10 +3,17 @@ ROOT_DIR="$(pwd)"
 rm -rf deployment
 mkdir -p deployment
 
-# Clone and build the project
+# Clone
 cd deployment
 git clone https://github.com/lbastigk/SDL_Crossplatform_Local.git
 cd SDL_Crossplatform_Local
+
+# Inform about last commit
+echo "[INFO] Last commit in repository:"
+git log -1 --oneline
+
+# Build the project
+echo "[INFO] Starting build process..."
 ./install.sh
 
 # Check if the build was successful

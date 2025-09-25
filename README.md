@@ -9,7 +9,6 @@ This repository contains scripts and makefiles to build the following SDL-Librar
 as:
 
 - Static Linux libraries
-- Shared Linux libraries
 - Shared Windows libraries
 
 Tested on:
