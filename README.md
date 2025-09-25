@@ -5,6 +5,7 @@ A Repository to build SDL2, SDL2_image and SDL2_ttf locally (static Linux libs a
 Tested on:
 
 - Fedora 42
+- Kubuntu 25.04
 
 Quick start
 -----------
@@ -20,10 +21,15 @@ Or run a focused build (keeps console output):
 
 ```bash
 # builds core, image and ttf for linux
-Scripts/SDL2_build/build_sdl.sh linux core image ttf
+Scripts/build_sdl.sh linux core image ttf
 
 # builds core, image and ttf for windows
-Scripts/SDL2_build/build_sdl.sh windows core image ttf 
+Scripts/build_sdl.sh windows core image ttf 
+```
+
+Full worflow with SDL installation, application build and test:
+```bash
+./install.sh && ./build.sh && Scripts/test_binaries.sh
 ```
 
 Outputs & logs
@@ -36,7 +42,7 @@ Outputs & logs
 Prerequisites
 -------------
 
-- CMake, build tools and a C compiler. The helper script attempts to install packages via `apt` or `dnf` (see `Scripts/SDL2_build/package_installation.sh`).
+- CMake, build tools and a C compiler. The helper script attempts to install packages via `apt` or `dnf` (see `Scripts/package_installation.sh`).
 - For Windows DLL builds: a mingw-w64 toolchain and the provided toolchain file `cmake/toolchains/dll_build.cmake` for dlls and `cmake/toolchains/application_build.cmake` for the SDL application itself
 
 Important notes
