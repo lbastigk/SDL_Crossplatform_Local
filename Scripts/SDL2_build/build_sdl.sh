@@ -42,13 +42,11 @@ rm -rf "$INSTALLATION_PATH"
 mkdir -p "$INSTALLATION_PATH"
 
 ######################################
-# Helper functions
-
-# Linux static build
+# Helper functions : Linux static build
 
 build_sdl2_core_linux() {
     local src="$PROJECT_ROOT/external/SDL2"
-    echo "[INFO] Building SDL2 core with CMake"
+    echo "[INFO] Building SDL2 core with CMake to ${INSTALLATION_PATH}"
 
     cd "$src"
     rm -rf build && mkdir build && cd build
@@ -59,34 +57,101 @@ build_sdl2_core_linux() {
         -DBUILD_SHARED_LIBS=OFF \
         -DSDL_STATIC=ON \
         -DSDL_SHARED=OFF \
+        -DCMAKE_INSTALL_LIBDIR=lib \
         -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
-        >> "$LOG_DIR/SDL2_cmake_configure.log" 2>&1
+        >> "$LOG_DIR/SDL2_core_linux_cmake.configure.log" 2>&1
 
-    make -j"$(nproc)" >> "$LOG_DIR/SDL2_cmake_make.log" 2>&1
-    make install     >> "$LOG_DIR/SDL2_cmake_install.log" 2>&1
+    make -j"$(nproc)" >> "$LOG_DIR/SDL2_core_linux_cmake.make.log" 2>&1
+    make install     >> "$LOG_DIR/SDL2_core_linux_cmake.install.log" 2>&1
 }
 
-# Cmake would be better, but at least it works
-build_autotools_component() {
-    local name="$1"
-    local src="$PROJECT_ROOT/external/$name"
-    echo "[INFO] Building $name with autotools"
+build_sdl_image_linux() {
+    local src="$PROJECT_ROOT/external/SDL_image"
+    echo "[INFO] Building SDL_image with CMake to ${INSTALLATION_PATH}"
 
     cd "$src"
-    # Only run make clean if a Makefile exists
-    [ -f Makefile ] && make clean || true
+    rm -rf build && mkdir build && cd build
 
-    autoreconf -fi >> "$LOG_DIR/${name}_autoreconf.log" 2>&1 || true
-    ./configure --prefix="$INSTALLATION_PATH" \
-        --with-sdl-prefix="$INSTALLATION_PATH" \
-        --enable-static --disable-shared CFLAGS=-fPIC \
-        >> "$LOG_DIR/${name}_configure.log" 2>&1
+    # Base CMake options
+    cmake .. \
+        -DCMAKE_INSTALL_PREFIX="$INSTALLATION_PATH" \
+        -DCMAKE_INSTALL_BINDIR=bin \
+        -DCMAKE_INSTALL_LIBDIR=lib \
+        -DCMAKE_INSTALL_INCLUDEDIR=include \
+        -DBUILD_SHARED_LIBS=OFF \
+        -DCMAKE_INSTALL_LIBDIR=lib \
+        -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+        >> "$LOG_DIR/SDL_image_cmake_configure.log" 2>&1
 
-    make -j"$(nproc)" >> "$LOG_DIR/${name}_make.log" 2>&1
-    make install     >> "$LOG_DIR/${name}_install.log" 2>&1
+    cmake --build . -j$(nproc) >> "$LOG_DIR/SDL_image_cmake_make.log" 2>&1
+    cmake --install . >> "$LOG_DIR/SDL_image_cmake_install.log" 2>&1
 }
 
-# Windows shared build
+build_sdl_ttf_linux() {
+    echo "[INFO] Building SDL_ttf with CMake to ${INSTALLATION_PATH}"
+    cd "$PROJECT_ROOT/external/SDL_ttf"
+    rm -rf build && mkdir build && cd build
+
+    #-DFREETYPE_INCLUDE_DIRS="$INSTALLATION_PATH/deps/freetype/include/freetype2" \
+    #-DZLIB_INCLUDE_DIR="/usr/include" \
+    #-DSDL2_TTF_SHARED=OFF \
+    #-DSDL2_TTF_STATIC=ON \
+    #-DWITH_ZLIB=OFF \
+    #-DSDL_ttf_BUILD_EXAMPLES=OFF \
+    #-DSDL_ttf_BUILD_TESTS=OFF \
+    cmake .. \
+        -DCMAKE_INSTALL_PREFIX="$INSTALLATION_PATH" \
+        -DBUILD_SHARED_LIBS=OFF \
+        -DCMAKE_INSTALL_LIBDIR=lib \
+        -DSDL2_DIR="$INSTALLATION_PATH/lib/cmake/SDL2" \
+        >> "$LOG_DIR/SDL_ttf_linux_cmake.log" 2>&1
+
+    cmake --build . -j$(nproc) >> "$LOG_DIR/SDL_ttf_linux_cmake_build.log" 2>&1
+    cmake --install . >> "$LOG_DIR/SDL_ttf_linux_cmake_install.log" 2>&1
+}
+
+######################################
+# Helper functions : Build FreeType and HarfBuzz for Linux static
+
+build_freetype_linux() {
+    local src="$PROJECT_ROOT/external/SDL_ttf/external/freetype"
+    local install_dir="$INSTALLATION_PATH/deps/freetype"
+    echo "[INFO] Building FreeType for Linux"
+
+    cd "$src"
+    rm -rf build && mkdir build && cd build
+
+    cmake .. \
+        -DCMAKE_INSTALL_PREFIX="$install_dir" \
+        -DBUILD_SHARED_LIBS=OFF \
+        -DCMAKE_INSTALL_LIBDIR=lib \
+        -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+    cmake --build . -j$(nproc)
+    cmake --install . --prefix "$install_dir"
+}
+
+build_harfbuzz_linux() {
+    local src="$PROJECT_ROOT/external/SDL_ttf/external/harfbuzz"
+    local install_dir="$INSTALLATION_PATH/deps/harfbuzz"
+    echo "[INFO] Building HarfBuzz for Linux"
+
+    cd "$src"
+    rm -rf build && mkdir build && cd build
+
+    #-DFREETYPE_INCLUDE_DIRS="$INSTALLATION_PATH/deps/freetype/include/freetype2"
+    #-DFREETYPE_LIBRARY="$INSTALLATION_PATH/deps/freetype/lib/libfreetype.a" \
+    cmake .. \
+        -DCMAKE_INSTALL_PREFIX="$install_dir" \
+        -DBUILD_SHARED_LIBS=OFF \
+        -DCMAKE_INSTALL_LIBDIR=lib \
+        -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+    cmake --build . -j$(nproc)
+    cmake --install . --prefix "$install_dir"
+}
+
+
+######################################
+# Helper functions : Windows shared build
 
 build_sdl2_core_windows() {
     local src="$PROJECT_ROOT/external/SDL2"
@@ -103,13 +168,14 @@ build_sdl2_core_windows() {
         -DSDL_SHARED=ON \
         -DSDL_STATIC=OFF \
         -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_LIBDIR=lib
         >> "$LOG_DIR/SDL2_win_cmake_configure.log" 2>&1
 
     cmake --build . --config Release -j"$(nproc)" >> "$LOG_DIR/SDL2_win_cmake_make.log" 2>&1
     cmake --install . --config Release >> "$LOG_DIR/SDL2_win_cmake_install.log" 2>&1
 }
 
-build_sdl2_image_windows(){
+build_sdl_image_windows(){
     echo "[INFO] Building SDL2 image for Windows DLL"
     cd "$PROJECT_ROOT"
     cd external/SDL_image
@@ -122,91 +188,93 @@ build_sdl2_image_windows(){
         -DSDL2_IMAGE_SHARED=ON \
         -DSDL2_IMAGE_STATIC=OFF \
         -DSDL2_DIR="$INSTALLATION_PATH/lib/cmake/SDL2" \
-        >> "$LOG_DIR/SDL2_image_win_cmake.log" 2>&1
-
+        -DCMAKE_INSTALL_LIBDIR=lib
+        >> "$LOG_DIR/SDL_image_win_cmake.log" 2>&1
     cmake --build . -j$(nproc)
     cmake --install . --prefix="$INSTALLATION_PATH"
 }
 
-build_sdl2_ttf_windows(){
-    echo "[INFO] Building SDL2_ttf for Windows DLL"
+build_sdl_ttf_windows(){
+    echo "[INFO] Building SDL_ttf for Windows DLL"
     cd "$PROJECT_ROOT/external/SDL_ttf"
     rm -rf build && mkdir build && cd build
+
+    # Disable host pkg-config
+    export PKG_CONFIG_EXECUTABLE=""
 
     cmake .. \
         -DCMAKE_TOOLCHAIN_FILE="$PROJECT_ROOT/cmake/toolchains/dll_build.cmake" \
         -DCMAKE_INSTALL_PREFIX="$INSTALLATION_PATH" \
-        -DFREETYPE_INCLUDE_DIRS="$INSTALLATION_PATH/deps/freetype/include/freetype2" \
         -DFREETYPE_LIBRARY="$INSTALLATION_PATH/deps/freetype/lib/libfreetype.dll.a" \
+        -DFREETYPE_INCLUDE_DIRS="$INSTALLATION_PATH/deps/freetype/include/freetype2" \
+        -DHARFBUZZ_INCLUDE_DIRS="$INSTALLATION_PATH/deps/harfbuzz/include" \
+        -DHARFBUZZ_LIBRARIES="$INSTALLATION_PATH/deps/harfbuzz/lib/libharfbuzz.dll.a" \
         -DBUILD_SHARED_LIBS=ON \
         -DSDL2_TTF_SHARED=ON \
         -DSDL2_TTF_STATIC=OFF \
         -DSDL2_DIR="$INSTALLATION_PATH/lib/cmake/SDL2" \
-        -DSDL2_ttf_BUILD_EXAMPLES=OFF \
-        -DSDL2_ttf_BUILD_TESTS=OFF >> "$LOG_DIR/SDL2_ttf_win_cmake.log" 2>&1
-
-    cmake --build   . --config Release -j$(nproc) >> "$LOG_DIR/SDL2_ttf_win_cmake_build.log" 2>&1
-    cmake --install . --config Release >> "$LOG_DIR/SDL2_ttf_win_cmake_install.log" 2>&1
+        -DSDL_ttf_BUILD_EXAMPLES=OFF \
+        -DCMAKE_INSTALL_LIBDIR=lib \
+        -DSDL_ttf_BUILD_TESTS=OFF \
+        >> "$LOG_DIR/SDL_ttf_win_cmake.log" 2>&1
+    cmake --build   . --config Release -j$(nproc) >> "$LOG_DIR/SDL_ttf_win_cmake_build.log" 2>&1
+    cmake --install . --config Release >> "$LOG_DIR/SDL_ttf_win_cmake_install.log" 2>&1
 }
 
-# Build FreeType and HarfBuzz for Windows DLLs
+######################################
+# Helper functions : Build FreeType and HarfBuzz for Windows DLLs
 
 build_freetype_windows() {
-    local src="$PROJECT_ROOT/external/SDL_ttf/external/freetype"
-    local install_dir="$INSTALLATION_PATH/deps/freetype"
     echo "[INFO] Building FreeType for Windows DLL"
-
-    cd "$src"
+    cd "$PROJECT_ROOT"
+    cd "external/SDL_ttf/external/freetype"
     rm -rf build && mkdir build && cd build
 
     cmake .. \
         -DCMAKE_TOOLCHAIN_FILE="$PROJECT_ROOT/cmake/toolchains/dll_build.cmake" \
-        -DCMAKE_INSTALL_PREFIX="$install_dir" \
+        -DCMAKE_INSTALL_PREFIX="$INSTALLATION_PATH/deps/freetype" \
         -DBUILD_SHARED_LIBS=ON \
-        -DCMAKE_POSITION_INDEPENDENT_CODE=ON
-
+        -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+        >> "$LOG_DIR/freetype_win_cmake.log" 2>&1
     cmake --build . -j$(nproc)
-    cmake --install . --prefix "$install_dir"
+    cmake --install . --prefix "$INSTALLATION_PATH/deps/freetype"
 }
 
 build_harfbuzz_windows() {
-    local src="$PROJECT_ROOT/external/SDL_ttf/external/harfbuzz"
-    local install_dir="$INSTALLATION_PATH/deps/harfbuzz"
     echo "[INFO] Building HarfBuzz for Windows DLL"
-
-    cd "$src"
+    cd "$PROJECT_ROOT"
+    cd "external/SDL_ttf/external/harfbuzz"
     rm -rf build && mkdir build && cd build
 
     cmake .. \
         -DCMAKE_TOOLCHAIN_FILE="$PROJECT_ROOT/cmake/toolchains/dll_build.cmake" \
-        -DCMAKE_INSTALL_PREFIX="$install_dir" \
+        -DCMAKE_INSTALL_PREFIX="$INSTALLATION_PATH/deps/harfbuzz" \
         -DBUILD_SHARED_LIBS=ON \
         -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
-        -DFREETYPE_LIBRARY="$INSTALLATION_PATH/deps/freetype/lib/libfreetype.dll.a" \
-        -DFREETYPE_INCLUDE_DIRS="$INSTALLATION_PATH/deps/freetype/include/freetype2"
-
+        >> "$LOG_DIR/harfbuzz_win_cmake.log" 2>&1
     cmake --build . -j$(nproc)
-    cmake --install . --prefix "$install_dir"
+    cmake --install . --prefix "$INSTALLATION_PATH/deps/harfbuzz"
 }
-
 
 ######################################
 # Build
 if   [ "$BUILD_TYPE" = linux ]; then
     echo "[INFO] Starting SDL2 $BUILD_TYPE build at $INSTALLATION_PATH"
-    [ "$BUILD_CORE"  = yes ] && build_sdl2_core_linux               #>> /dev/null 2>&1
-    [ "$BUILD_IMAGE" = yes ] && build_autotools_component SDL_image #>> /dev/null 2>&1
-    [ "$BUILD_TTF"   = yes ] && build_autotools_component SDL_ttf   #>> /dev/null 2>&1
+    [ "$BUILD_CORE"  = yes ] && build_sdl2_core_linux    #>> /dev/null 2>&1
+    [ "$BUILD_IMAGE" = yes ] && build_sdl_image_linux    #>> /dev/null 2>&1
+    if [ "$BUILD_TTF"   = yes ] ; then 
+        build_freetype_linux    #>> /dev/null 2>&1
+        build_harfbuzz_linux    #>> /dev/null 2>&1
+        build_sdl_ttf_linux     #>> /dev/null 2>&1
+    fi
 elif [ "$BUILD_TYPE" = windows ]; then
     echo "[INFO] Starting SDL2 $BUILD_TYPE build at $INSTALLATION_PATH"
     [ "$BUILD_CORE"  = yes ] && build_sdl2_core_windows  #>> /dev/null 2>&1
-    [ "$BUILD_IMAGE" = yes ] && build_sdl2_image_windows #>> /dev/null 2>&1
-
-    
+    [ "$BUILD_IMAGE" = yes ] && build_sdl_image_windows  #>> /dev/null 2>&1
     if [ "$BUILD_TTF"   = yes ] ; then 
-        build_freetype_windows   #>> /dev/null 2>&1
-        build_harfbuzz_windows   #>> /dev/null 2>&1
-        build_sdl2_ttf_windows   #>> /dev/null 2>&1
+        build_freetype_windows  #>> /dev/null 2>&1
+        build_harfbuzz_windows  #>> /dev/null 2>&1
+        build_sdl_ttf_windows   #>> /dev/null 2>&1
     fi
 else
     echo "[ERROR] Unsupported BUILD_TYPE: $BUILD_TYPE" >&2

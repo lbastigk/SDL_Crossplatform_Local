@@ -1,6 +1,6 @@
 # Crossplatform, local, SDL2 Build made easy
 
-This repository contains scripts and makefiles to build the following SDL-Libraries locally:
+This repository contains scripts and makefiles to build the following SDL-Libraries locally with CMake:
 
 - SDL2
 - SDL2_image
