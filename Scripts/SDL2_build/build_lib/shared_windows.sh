@@ -95,51 +95,49 @@ export LDFLAGS="-Wl,--enable-auto-import -L$INSTALLATION_PATH/lib $LDFLAGS"
 # Ensure logs dir exists
 mkdir -p "$PROJECT_ROOT/build/logs"
 
-# Create shims directory to satisfy versioned automake/aclocal calls made by some Makefiles.
-# We'll create aclocal-1.16 and automake-1.16 that forward to whatever automake/aclocal exists.
+# Create and populate a single shims dir (aclocal/automake/sdl2-config) used by configure/make
 SHIM_DIR="$(mktemp -d)"
-cleanup_shim() {
-    rm -rf "$SHIM_DIR"
-}
+cleanup_shim() { rm -rf "$SHIM_DIR"; }
 trap cleanup_shim EXIT
 
-# helper to create shim if target missing
-create_shim() {
-    local target="$1"; shift
-    local fallback="$1"; shift
-    if ! command -v "$target" >/dev/null 2>&1; then
-        if command -v "$fallback" >/dev/null 2>&1; then
-            cat > "$SHIM_DIR/$target" <<SHIM
+# If the system has aclocal/automake variants, create lightweight shims named with the older versions
+if command -v aclocal-1.17 >/dev/null 2>&1; then
+    cat > "$SHIM_DIR/aclocal-1.16" <<'SHIM'
 #!/bin/sh
-exec $fallback "$@"
+exec aclocal-1.17 "$@"
 SHIM
-            chmod +x "$SHIM_DIR/$target"
-        fi
-    fi
-}
+    chmod +x "$SHIM_DIR/aclocal-1.16"
+elif command -v aclocal >/dev/null 2>&1; then
+    cat > "$SHIM_DIR/aclocal-1.16" <<'SHIM'
+#!/bin/sh
+exec aclocal "$@"
+SHIM
+    chmod +x "$SHIM_DIR/aclocal-1.16"
+fi
 
-# Make shims for aclocal-1.16 and automake-1.16
-create_shim "aclocal-1.16" "aclocal-1.17"
-create_shim "aclocal-1.16" "aclocal"
-create_shim "automake-1.16" "automake-1.17"
-create_shim "automake-1.16" "automake"
+if command -v automake-1.17 >/dev/null 2>&1; then
+    cat > "$SHIM_DIR/automake-1.16" <<'SHIM'
+#!/bin/sh
+exec automake-1.17 "$@"
+SHIM
+    chmod +x "$SHIM_DIR/automake-1.16"
+elif command -v automake >/dev/null 2>&1; then
+    cat > "$SHIM_DIR/automake-1.16" <<'SHIM'
+#!/bin/sh
+exec automake "$@"
+SHIM
+    chmod +x "$SHIM_DIR/automake-1.16"
+fi
 
-# If no suitable aclocal or automake executable exists, set ACLOCAL/AUTOMAKE to ':' to prevent autoreconf
+# If neither aclocal nor automake exists, fall back to a no-op during this make run
 if ! command -v aclocal >/dev/null 2>&1 && [ ! -x "$SHIM_DIR/aclocal-1.16" ]; then
-    echo "[WARNING] aclocal not found; setting ACLOCAL to ':' to avoid autoreconf during make" > /dev/stderr
     export ACLOCAL=:
-else
-    export ACLOCAL=${ACLOCAL:-aclocal-1.16}
 fi
-
 if ! command -v automake >/dev/null 2>&1 && [ ! -x "$SHIM_DIR/automake-1.16" ]; then
-    echo "[WARNING] automake not found; setting AUTOMAKE to ':' to avoid autoreconf during make" > /dev/stderr
     export AUTOMAKE=:
-else
-    export AUTOMAKE=${AUTOMAKE:-automake-1.16}
 fi
 
-# Prepend shim dir to PATH so make/autoreconf will find our shims when invoked
+# Prepend shim dir to PATH so configure/make can find our shims
 PATH="$SHIM_DIR:$PATH"
 
 # Export pkg-config path and flags so SDL2_image's configure can find cross-built SDL2
@@ -154,16 +152,16 @@ export LIBS="-lSDL2 $LIBS"
 # Create a small sdl2-config wrapper that strips -lSDL2main from --libs output.
 # SDL2_image's build system may link in SDL2main (an application-only static lib),
 # which prevents libtool from creating a shared SDL2_image.dll. Filter it out.
-cat > "$SHIM_DIR/sdl2-config" <<SHIM
+# Create minimal sdl2-config wrapper that filters -lSDL2main from --libs output but
+# point configure directly at the real installed sdl2-config to avoid double-shim execs.
+cat > "$SHIM_DIR/sdl2-config" <<'SHIM'
 #!/bin/sh
-# hardcode real sdl2-config path at shim creation time
 REAL="$INSTALLATION_PATH/bin/sdl2-config"
 if [ "$#" -eq 0 ]; then
     exec "$REAL"
 fi
 case "$1" in
     --libs|--libs-only-l|--libs-only-other|-libs)
-        # remove -lSDL2main which is for apps, not for linking shared modules
         "$REAL" "$@" | sed 's/-lSDL2main//g'
         ;;
     *)
@@ -172,8 +170,6 @@ case "$1" in
 esac
 SHIM
 chmod +x "$SHIM_DIR/sdl2-config"
-PATH="$SHIM_DIR:$PATH"
-# Point configure to the real installed sdl2-config to avoid transient shim exec issues
 export SDL2_CONFIG="$INSTALLATION_PATH/bin/sdl2-config"
 
 # Build (capture output to logs)
