@@ -1,16 +1,46 @@
-# Crossplatform, local, SDL2 Build made easy
+# SDL Crossplatform Local Build — Made easy
 
-This repository contains scripts and makefiles to build the following SDL-Libraries locally with CMake:
+A Repository to build SDL2, SDL2_image and SDL2_ttf locally (static Linux libs and Windows DLLs).
 
-- SDL2
-- SDL2_image
-- SDL2_ttf
+Quick start
+-----------
 
-as:
+1. Clone and cd into the repo.
+2. Run (as a normal user):
 
-- Static Linux libraries
-- Shared Windows libraries
+```bash
+./install.sh
+```
 
-Tested on:
+Or run a focused build (keeps console output):
 
-- Fedora 42
+```bash
+# builds core, image and ttf for linux
+Scripts/SDL2_build/build_sdl.sh linux core image ttf
+
+# builds core, image and ttf for windows
+Scripts/SDL2_build/build_sdl.sh windows core image ttf 
+```
+
+Outputs & logs
+--------------
+
+- Linux static: `build/SDL2/static_linux`
+- Windows shared: `build/SDL2/shared_windows`
+- Logs: `build/logs/*.log`
+
+Prerequisites
+-------------
+
+- CMake, build tools and a C compiler. The helper script attempts to install packages via `apt` or `dnf` (see `Scripts/SDL2_build/package_installation.sh`).
+- For Windows DLL builds: a mingw-w64 toolchain and the provided toolchain file `cmake/toolchains/dll_build.cmake` for dlls and `cmake/toolchains/application_build.cmake` for the SDL application itself
+
+Important notes
+---------------
+
+- `install.sh` removes `external/` and `build/` before building. Back up local changes.
+- Package installation supports only `apt` and `dnf` and the package list may be broader than needed.
+- Check `build/logs/` for full CMake/make logs (the top-level script hides console output).
+
+
+Issues or improvements: open an issue or PR.
