@@ -14,6 +14,7 @@ fi
 
 ######################################
 # Make all scripts executable
+chmod +x Scripts/*.sh
 chmod +x Scripts/SDL2_build/*.sh
 
 ######################################
