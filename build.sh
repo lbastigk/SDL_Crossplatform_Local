@@ -96,10 +96,6 @@ function build_release_windows() {
       done
 }
 
-function generate_standards() {
-    ./bin/SDL_Example standardfile render-object
-}
-
 #############################################################
 # [BUILD]
 rm -rf "./bin/SDL_Example"
