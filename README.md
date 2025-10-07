@@ -5,7 +5,7 @@ A Repository to build SDL2, SDL2_image and SDL2_ttf locally (static Linux libs a
 Tested on:
 
 - Fedora 42
-- Kubuntu 25.04
+- Kubuntu 25.04 (TODO: SDL_ttf might fail, missing dependency in package installation script!)
 
 Quick start
 -----------
